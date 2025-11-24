@@ -27,7 +27,7 @@ jobs:
         working-directory: ./frontend
 
       - name: Deploy a S3
-        uses: jakejarvis/s3-sync-action@v1
+        uses: jakejarvis/s3-sync-action@v2
         with:
           args: --delete
         env:
