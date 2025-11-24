@@ -1,0 +1,48 @@
+name: Desploy de React frontend al S3 y CloudFront
+
+on:
+push:
+branches:
+- main  # cambia si tu rama principal es otra
+
+jobs:
+deploy:
+runs-on: ubuntu-latest
+
+
+steps:
+  - name: Revisión de repositorio
+    uses: actions/checkout@v3
+
+  - name: Setup Node.js
+    uses: actions/setup-node@v3
+    with:
+      node-version: 18
+
+  - name: Instalar dependencias
+    working-directory: ./frontend
+    run: npm install
+
+  - name: Build React 
+    working-directory: ./frontend
+    run: npm run build
+
+  - name: Deploy a S3
+    uses: jakejarvis/s3-sync-action@v1
+    with:
+      args: --delete
+    env:
+      AWS_S3_BUCKET: ${{ secrets.AWS_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SOURCE_DIR: ./frontend/dist
+
+  - name: Invalidar cache de cloudfront
+    uses: chetan/invalidate-cloudfront-action@v1
+    with:
+      distribution-id: ${{ secrets.CLOUDFRONT_ID }}
+      paths: "/*"
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
