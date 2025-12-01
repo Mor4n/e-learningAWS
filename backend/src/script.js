@@ -6,10 +6,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Importar rutas
-const authRoutes = require('./routes/auth');
-const coursesRoutes = require('./routes/courses');
-const enrollmentsRoutes = require('./routes/enrollments');
-const progressRoutes = require('./routes/progress');
+const coursesRoutes = require('./routes/courses-only');
+// Cognito maneja autenticación (sin rutas de auth local)
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,10 +24,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/courses', coursesRoutes);
-app.use('/api/enrollments', enrollmentsRoutes);
-app.use('/api/progress', progressRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -37,7 +32,15 @@ app.get('/api/health', (req, res) => {
     status: 'OK', 
     message: 'Mini Udemy API is running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    auth: 'AWS Cognito',
+    database: 'DynamoDB',
+    dynamodb: {
+      region: process.env.AWS_REGION,
+      tables: {
+        courses: process.env.DYNAMODB_TABLE_COURSES,
+      }
+    }
   });
 });
 
@@ -45,14 +48,14 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Welcome to Mini Udemy API',
-    version: '1.0.0',
+    version: '2.0.0',
+    auth: 'AWS Cognito (Frontend)',
+    database: 'DynamoDB',
     endpoints: {
-      auth: '/api/auth',
       courses: '/api/courses',
-      enrollments: '/api/enrollments',
-      progress: '/api/progress',
       health: '/api/health'
-    }
+    },
+    note: 'Autenticación manejada por AWS Cognito en el frontend'
   });
 });
 
@@ -77,6 +80,9 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔐 Auth: AWS Cognito (Frontend)`);
+  console.log(`🗄️  Database: DynamoDB (${process.env.AWS_REGION})`);
+  console.log(`📊 Table: Cursos`);
   console.log(`🌍 CORS enabled for all origins`);
 });
 
