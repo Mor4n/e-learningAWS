@@ -6,17 +6,37 @@ import './index.css'
 import App from './App.jsx'
 
 // Configuración de AWS Cognito con OIDC
+const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+const redirectUri = import.meta.env.VITE_COGNITO_REDIRECT_URI;
+
 const cognitoConfig = {
-  authority: import.meta.env.VITE_COGNITO_DOMAIN,
-  client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
-  redirect_uri: import.meta.env.VITE_COGNITO_REDIRECT_URI,
+  authority: cognitoDomain,
+  client_id: clientId,
+  redirect_uri: redirectUri,
   response_type: 'code',
   scope: 'openid email profile',
+  
+  // Endpoints de Cognito
+  metadata: {
+    issuer: cognitoDomain,
+    authorization_endpoint: `${cognitoDomain}/oauth2/authorize`,
+    token_endpoint: `${cognitoDomain}/oauth2/token`,
+    userinfo_endpoint: `${cognitoDomain}/oauth2/userInfo`,
+    end_session_endpoint: `${cognitoDomain}/logout`,
+    jwks_uri: `${cognitoDomain}/.well-known/jwks.json`,
+  },
   
   onSigninCallback: () => {
     window.history.replaceState({}, document.title, window.location.pathname);
   },
 };
+
+console.log('Cognito Config:', {
+  domain: cognitoDomain,
+  clientId: clientId,
+  redirectUri: redirectUri
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
