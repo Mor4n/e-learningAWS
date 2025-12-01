@@ -1,4 +1,4 @@
-// Configuración de AWS Cognito para OIDC
+// Configuración de AWS Cognito para OIDC-
 export const cognitoConfig = {
   authority: import.meta.env.VITE_COGNITO_DOMAIN,
   client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
